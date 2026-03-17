@@ -1,22 +1,18 @@
-tags: 
+tags:
 title: $:/plugins/kookma/todolist/macros/interstitial-utility
 type: text/vnd.tiddlywiki
 
 \define todolist-input-journal()
-<$keyboard key="escape" actions=<<todolist-cancel-journal-action>>   >
-<$keyboard key="enter"  actions=<<todolist-add-journal-action>> >
-<$edit-text 
- tiddler=<<stateTiddler>> 
- index="itemtext" 
- tag="input"
- class="kk-todolist-input-textbox"
- placeholder="add new item"
- default="" minHeight="1em" focus="yes"
- />
-</$keyboard> 
-</$keyboard> 
+<$keyboard key="escape" actions=<<todolist-cancel-journal-action>>>
+<$tiptap-editor
+ tiddler=<<stateTiddler>>
+ index="itemtext"
+ class="kk-todolist-tiptap-input"
+ placeholder="写下此刻想法..."
+/>
+</$keyboard>
 \end
- 
+
 \define todolist-add-journal()
 <$button class="tc-btn-invisible" tooltip="Add new item">
 	{{$:/core/images/new-button}}
@@ -27,7 +23,7 @@ type: text/vnd.tiddlywiki
 \define todolist-add-journal-action()
   <$list filter="[<stateTiddler>getindex[itemtext]!is[blank]]" variable=ignor>
 	<$set name=item value=<<now "[UTC]YYYY0MM0DD0hh0mm0ssXXX">> >
-	<$action-setfield 
+	<$action-setfield
 	 $tiddler=<<taskTiddler>>
 	 $index=<<item>>
 	 $value={{{ [<stateTiddler>getindex[itemtext]] }}}
@@ -51,21 +47,27 @@ type: text/vnd.tiddlywiki
 
 \define disp-journals-in-view-mode()
 \whitespace trim
-<$list filter="[<taskTiddler>indexes[]]" variable="item">
+<$list filter="[<taskTiddler>indexes[]first8[]!sort[]!limit[5]]" variable="dateGroup">
+<div class="kk-todolist-date-header"><$text text={{{ [<dateGroup>format:date[0MM-0DD]] }}}/></div>
+<$list filter="[<taskTiddler>indexes[]prefix<dateGroup>!sort[]]" variable="item">
 <div class="kk-todolist-row">
   <div class="kk-todolist-time"><$view tiddler=<<item>> field=title format=date template="0hh:0mm"/></div>
-  <div class="kk-todolist-desc"><<todolist-show-task>></div>
+  <div class="kk-todolist-desc"><$tiptap-view tiddler=<<taskTiddler>> index=<<item>>/></div>
 </div>
+</$list>
 </$list>
 \end
 
 \define disp-journals-in-edit-mode()
-<!-- this macro is the same as disp-list-in-edit-mode -->
-<$list filter="[<taskTiddler>indexes[]]" variable="item">
+\whitespace trim
+<$list filter="[<taskTiddler>indexes[]first8[]!sort[]!limit[5]]" variable="dateGroup">
+<div class="kk-todolist-date-header"><$text text={{{ [<dateGroup>format:date[0MM-0DD]] }}}/></div>
+<$list filter="[<taskTiddler>indexes[]prefix<dateGroup>!sort[]]" variable="item">
 <div class="kk-todolist-row">
   <div class="kk-todolist-time"><$view tiddler=<<item>> field=title format=date template="0hh:0mm"/></div>
-  <div class="kk-todolist-desc"><<todolist-show-task>></div>
+  <div class="kk-todolist-desc"><$tiptap-editor tiddler=<<taskTiddler>> index=<<item>> class="kk-todolist-tiptap-edit"/></div>
   <div class="kk-todolist-delete"><$macrocall $name="todolist-delete-journal" dataTiddler=<<taskTiddler>>/></div>
 </div>
+</$list>
 </$list>
 \end
